@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FaceTrack - Students</title>
+    <title>FaceTrack - Student Registration</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/style.css">
 </head>
@@ -16,21 +16,19 @@
         </div>
         <ul class="nav-links">
             <li class="nav-item"><a href="index.html"><i class="fas fa-chart-line"></i> Dashboard</a></li>
-            <li class="nav-item"><a href="students.html" class="active"><i class="fas fa-user-graduate"></i> Students</a></li>
+            <li class="nav-item"><a href="students.html" class="active"><i class="fas fa-user-graduate"></i> Register</a></li>
             <li class="nav-item"><a href="attendance.html"><i class="fas fa-user-check"></i> Take Attendance</a></li>
-            <li class="nav-item"><a href="records.html"><i class="fas fa-history"></i> Records & Reports</a></li>
         </ul>
     </aside>
 
     <main class="main-content">
         <div class="header">
-            <h2>Student Management</h2>
+            <h2>Student Registration</h2>
             <div id="alertContainer"></div>
         </div>
 
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
-            <!-- Registration Form -->
-            <div class="glass-card">
+        <div style="display: flex; justify-content: center;">
+            <div class="glass-card" style="width: 100%; max-width: 800px;">
                 <h3 style="margin-bottom: 1.5rem; font-family: 'Outfit';">Register New Student</h3>
                 <form id="registrationForm">
                     <div class="form-grid" style="margin-bottom: 1.5rem;">
@@ -47,16 +45,24 @@
                             <input type="text" id="enrollmentNo" class="form-control" required>
                         </div>
                         <div class="form-group">
+                            <label>Email</label>
+                            <input type="email" id="email" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Branch</label>
+                            <select id="branch_id" class="form-control" required><option value="">Select Branch</option></select>
+                        </div>
+                        <div class="form-group">
                             <label>Division</label>
-                            <input type="text" id="division" class="form-control" required placeholder="e.g. C">
+                            <select id="division_id" class="form-control" required><option value="">Select Division</option></select>
                         </div>
                         <div class="form-group">
                             <label>Semester</label>
                             <input type="number" id="semester" class="form-control" required min="1" max="8">
                         </div>
                         <div class="form-group">
-                            <label>Email</label>
-                            <input type="email" id="email" class="form-control" required>
+                            <label>Password</label>
+                            <input type="password" id="password" class="form-control" required placeholder="Create a password">
                         </div>
                     </div>
 
@@ -68,12 +74,12 @@
                         </div>
                         <div id="cameraPreview" style="display:none; position: relative; border-radius: 8px; overflow: hidden; background: #000; width: 100%; aspect-ratio: 4/3; margin-bottom: 1rem;">
                             <video id="regVideo" autoplay style="width: 100%; height: 100%; object-fit: cover;"></video>
+                            <div class="camera-overlay"></div>
+                            <div class="scanner-line" style="display:block;"></div>
                         </div>
                         <div id="snapshotPreview" style="display:none; position: relative; border-radius: 8px; overflow: hidden; width: 100%; aspect-ratio: 4/3; margin-bottom: 1rem; border: 2px solid var(--success);">
                             <img id="capturedImage" style="width: 100%; height: 100%; object-fit: cover;">
-                            <div style="position: absolute; top: 10px; right: 10px; background: var(--success); color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem;">
-                                Face Captured
-                            </div>
+                            <div style="position: absolute; top: 10px; right: 10px; background: var(--success); color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem;">Face Captured</div>
                             <button type="button" class="btn btn-secondary" id="retakeBtn" style="position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%);">Retake</button>
                         </div>
                         <canvas id="regCanvas" style="display: none;"></canvas>
@@ -85,29 +91,9 @@
                     </button>
                 </form>
             </div>
-
-            <!-- Student List -->
-            <div class="glass-card" style="height: fit-content; max-height: 80vh; overflow-y: auto;">
-                <h3 style="margin-bottom: 1.5rem; font-family: 'Outfit';">Registered Students</h3>
-                <div class="table-container">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Name</th>
-                                <th>Div</th>
-                            </tr>
-                        </thead>
-                        <tbody id="studentsTableBody">
-                            <tr><td colspan="3" style="text-align:center;">Loading...</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
         </div>
     </main>
 
-    <script src="js/api.js"></script>
     <script src="js/students.js"></script>
 </body>
 </html>

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FaceTrack - Take Attendance</title>
+    <title>FaceTrack - Attendance</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/style.css">
 </head>
@@ -16,9 +16,8 @@
         </div>
         <ul class="nav-links">
             <li class="nav-item"><a href="index.html"><i class="fas fa-chart-line"></i> Dashboard</a></li>
-            <li class="nav-item"><a href="students.html"><i class="fas fa-user-graduate"></i> Students</a></li>
+            <li class="nav-item"><a href="students.html"><i class="fas fa-user-graduate"></i> Register</a></li>
             <li class="nav-item"><a href="attendance.html" class="active"><i class="fas fa-user-check"></i> Take Attendance</a></li>
-            <li class="nav-item"><a href="records.html"><i class="fas fa-history"></i> Records & Reports</a></li>
         </ul>
     </aside>
 
@@ -28,64 +27,124 @@
             <div id="alertContainer"></div>
         </div>
 
-        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 2rem;">
-            <!-- Camera Section -->
-            <div class="glass-card" style="display: flex; flex-direction: column; align-items: center;">
-                <div class="camera-container" id="cameraContainer">
-                    <video id="videoFeed" autoplay playsinline></video>
+        <div style="display: flex; justify-content: center; align-items: center; flex-direction: column;">
+            
+            <div class="glass-card" style="width: 100%; max-width: 600px; text-align: center; margin-bottom: 2rem;">
+                <h3 style="font-family: Outfit; font-size: 1.5rem; margin-bottom: 1rem;">Active Attendance Session</h3>
+                
+                <div class="camera-container" id="cameraContainer" style="margin-bottom: 1.5rem; display: none;">
+                    <video id="videoFeed" autoplay></video>
                     <div class="camera-overlay"></div>
                     <div class="scanner-line"></div>
                 </div>
-                <div style="margin-top: 1.5rem; display: flex; gap: 1rem;">
-                    <button id="startCamBtn" class="btn btn-primary"><i class="fas fa-video"></i> Start Camera</button>
-                    <button id="stopCamBtn" class="btn btn-secondary" style="display: none;"><i class="fas fa-video-slash"></i> Stop Camera</button>
-                    <button id="scanBtn" class="btn btn-primary" style="display: none;">
-                        <i class="fas fa-expand"></i> Scan Face
-                    </button>
+
+                <div id="startScreen">
+                    <i class="fas fa-camera" style="font-size: 4rem; color: var(--primary-color); margin-bottom: 1rem;"></i>
+                    <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">Align your face in the center to mark attendance</p>
+                    <button class="btn btn-primary" id="startBtn" style="width: 100%; max-width: 300px;"><i class="fas fa-play"></i> Start Camera</button>
                 </div>
-                <canvas id="scanCanvas" style="display: none;"></canvas>
+
+                <button class="btn btn-success" id="scanBtn" style="display: none; width: 100%; max-width: 300px; margin: 0 auto; background: var(--success); color: white;">
+                    <i class="fas fa-crosshairs"></i> Mark Attendance
+                </button>
             </div>
 
-            <!-- Result Section -->
-            <div class="glass-card">
-                <h3 style="margin-bottom: 1.5rem; font-family: 'Outfit';">Scan Result</h3>
-                
-                <div id="loadingResult" style="display: none; text-align: center; padding: 2rem 0;">
-                    <div class="loader" style="border-color: var(--primary-color); border-top-color: transparent; width: 40px; height: 40px; margin: 0 auto 1rem;"></div>
-                    <p style="color: var(--text-secondary);">Identifying face...</p>
-                </div>
-
-                <div id="resultCard" style="display: none; text-align: center;">
-                    <div id="resultIcon" style="font-size: 4rem; margin-bottom: 1rem;"></div>
-                    <h2 id="resultName" style="font-family: 'Outfit'; margin-bottom: 0.5rem;"></h2>
-                    <p id="resultId" style="color: var(--text-secondary); margin-bottom: 1.5rem; font-size: 1.1rem;"></p>
-                    
-                    <div style="background: rgba(0,0,0,0.2); padding: 1rem; border-radius: 8px; text-align: left;">
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
-                            <span style="color: var(--text-secondary);">Date:</span>
-                            <span id="resultDate" style="font-weight: 500;"></span>
-                        </div>
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
-                            <span style="color: var(--text-secondary);">Time:</span>
-                            <span id="resultTime" style="font-weight: 500;"></span>
-                        </div>
-                        <div style="display: flex; justify-content: space-between;">
-                            <span style="color: var(--text-secondary);">Status:</span>
-                            <span id="resultStatus" class="badge"></span>
-                        </div>
+            <div class="glass-card" id="resultCard" style="width: 100%; max-width: 600px; display: none;">
+                <div style="display: flex; gap: 1rem; align-items: center;">
+                    <div id="resultIcon" style="font-size: 3rem;"></div>
+                    <div>
+                        <h3 id="resultName" style="font-family: Outfit; font-size: 1.5rem;"></h3>
+                        <p id="resultId" style="color: var(--text-secondary);"></p>
+                        <p id="resultStatus" style="font-weight: bold; margin-top: 0.5rem;"></p>
                     </div>
                 </div>
-
-                <div id="idleState" style="text-align: center; padding: 3rem 0; color: var(--text-secondary);">
-                    <i class="fas fa-user-circle" style="font-size: 4rem; margin-bottom: 1rem; opacity: 0.5;"></i>
-                    <p>Ready to scan.</p>
-                    <p style="font-size: 0.9rem; margin-top: 0.5rem;">Position face within the circle and click Scan.</p>
-                </div>
             </div>
+
         </div>
+        <canvas id="canvas" style="display: none;"></canvas>
     </main>
 
     <script src="js/api.js"></script>
-    <script src="js/attendance.js"></script>
+    <script>
+        const video = document.getElementById('videoFeed');
+        const canvas = document.getElementById('canvas');
+        const startBtn = document.getElementById('startBtn');
+        const scanBtn = document.getElementById('scanBtn');
+        const cameraContainer = document.getElementById('cameraContainer');
+        const startScreen = document.getElementById('startScreen');
+        const resultCard = document.getElementById('resultCard');
+        const alertContainer = document.getElementById('alertContainer');
+        let stream = null;
+
+        function showAlert(msg, type='error') {
+            alertContainer.innerHTML = `<div class="alert alert-${type}">${msg}</div>`;
+            setTimeout(()=>alertContainer.innerHTML='', 4000);
+        }
+
+        let autoScanInterval = null;
+        let isProcessing = false;
+
+        startBtn.addEventListener('click', async () => {
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                video.srcObject = stream;
+                startScreen.style.display = 'none';
+                cameraContainer.style.display = 'block';
+                cameraContainer.classList.add('scanning');
+                scanBtn.style.display = 'none'; // Hide manual scan button
+                
+                // Start auto-scanning every 2 seconds
+                autoScanInterval = setInterval(performAutoScan, 2000);
+            } catch (err) {
+                showAlert('Camera access denied.', 'error');
+            }
+        });
+
+        async function performAutoScan() {
+            if (isProcessing) return;
+            isProcessing = true;
+            
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            canvas.getContext('2d').drawImage(video, 0, 0);
+            const imageBase64 = canvas.toDataURL('image/jpeg');
+
+            try {
+                const res = await fetch('http://localhost:5000/api/attendance/mark', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ image: imageBase64 })
+                });
+                const data = await res.json();
+                
+                if(res.ok) {
+                    resultCard.style.display = 'block';
+                    document.getElementById('resultIcon').innerHTML = '<i class="fas fa-check-circle" style="color: var(--success);"></i>';
+                    document.getElementById('resultName').textContent = data.student_name;
+                    document.getElementById('resultId').textContent = data.student_id;
+                    document.getElementById('resultStatus').textContent = data.status || data.message;
+                    document.getElementById('resultStatus').style.color = 'var(--success)';
+                    
+                    // Hide the success message after 3 seconds so it's ready for the next person
+                    setTimeout(() => { resultCard.style.display = 'none'; }, 3000);
+                } else {
+                    // Only show error if it's not a generic "no face" error to avoid flashing screen
+                    if(data.error !== 'No face detected.' && data.error !== 'Face not recognized for the current active sessions.') {
+                        resultCard.style.display = 'block';
+                        document.getElementById('resultIcon').innerHTML = '<i class="fas fa-times-circle" style="color: var(--danger);"></i>';
+                        document.getElementById('resultName').textContent = 'Recognition Failed';
+                        document.getElementById('resultId').textContent = '';
+                        document.getElementById('resultStatus').textContent = data.error;
+                        document.getElementById('resultStatus').style.color = 'var(--danger)';
+                        setTimeout(() => { resultCard.style.display = 'none'; }, 2000);
+                    }
+                }
+            } catch (err) {
+                // Ignore network errors in auto-scan loop
+            } finally {
+                isProcessing = false;
+            }
+        }
+    </script>
 </body>
 </html>

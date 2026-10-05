@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - FaceTrack</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        .admin-layout { display: flex; }
+        .section { display: none; }
+        .section.active { display: block; }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; }
+        .modal.active { display: flex; }
+        .modal-content { background: var(--background-card); backdrop-filter: blur(16px); padding: 2rem; border-radius: 16px; width: 400px; border: 1px solid var(--glass-border); box-shadow: var(--glass-shadow); }
+        .modal-header { display: flex; justify-content: space-between; margin-bottom: 1rem; }
+        .modal-header button { background: none; border: none; color: white; cursor: pointer; font-size: 1.2rem; }
+    </style>
+</head>
+<body class="admin-layout">
+
+    <aside class="sidebar">
+        <div class="logo">
+            <div class="logo-icon"><i class="fas fa-camera"></i></div>
+            <h1>Admin Panel</h1>
+        </div>
+        <ul class="nav-links">
+            <li class="nav-item"><a onclick="showSection('dashboard')" id="nav-dashboard" class="active"><i class="fas fa-chart-line"></i> Dashboard</a></li>
+            <li class="nav-item"><a onclick="showSection('branches')" id="nav-branches"><i class="fas fa-code-branch"></i> Branches</a></li>
+            <li class="nav-item"><a onclick="showSection('divisions')" id="nav-divisions"><i class="fas fa-users-class"></i> Divisions</a></li>
+            <li class="nav-item"><a onclick="showSection('students')" id="nav-students"><i class="fas fa-user-graduate"></i> Students</a></li>
+            <li class="nav-item"><a onclick="showSection('schedules')" id="nav-schedules"><i class="fas fa-calendar-alt"></i> Schedules</a></li>
+            <li class="nav-item"><a onclick="showSection('reports')" id="nav-reports"><i class="fas fa-file-alt"></i> Reports</a></li>
+            <li class="nav-item"><a onclick="showSection('audit')" id="nav-audit"><i class="fas fa-history"></i> Audit Logs</a></li>
+            <li class="nav-item"><a onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+        </ul>
+    </aside>
+
+    <main class="main-content">
+        <div class="header">
+            <h2 id="page-title">Dashboard</h2>
+            <div id="alertContainer"></div>
+        </div>
+
+        <!-- DASHBOARD -->
+        <div id="dashboard" class="section active">
+            <div class="stats-grid">
+                <div class="glass-card stat-card">
+                    <div class="stat-icon primary"><i class="fas fa-users"></i></div>
+                    <div class="stat-info"><h3>Total Students</h3><p id="stat-students">0</p></div>
+                </div>
+                <div class="glass-card stat-card">
+                    <div class="stat-icon success"><i class="fas fa-check-circle"></i></div>
+                    <div class="stat-info"><h3>Present Today</h3><p id="stat-present">0</p></div>
+                </div>
+                <div class="glass-card stat-card">
+                    <div class="stat-icon danger"><i class="fas fa-times-circle"></i></div>
+                    <div class="stat-info"><h3>Absent Today</h3><p id="stat-absent">0</p></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- BRANCHES -->
+        <div id="branches" class="section">
+            <div class="glass-card">
+                <button class="btn btn-primary" onclick="openModal('branchModal')"><i class="fas fa-plus"></i> Add Branch</button>
+                <div class="table-container" style="margin-top:1rem">
+                    <table>
+                        <thead><tr><th>ID</th><th>Name</th><th>Actions</th></tr></thead>
+                        <tbody id="branchesTable"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- DIVISIONS -->
+        <div id="divisions" class="section">
+            <div class="glass-card">
+                <button class="btn btn-primary" onclick="openModal('divisionModal')"><i class="fas fa-plus"></i> Add Division</button>
+                <div class="table-container" style="margin-top:1rem">
+                    <table>
+                        <thead><tr><th>ID</th><th>Branch</th><th>Name</th><th>Actions</th></tr></thead>
+                        <tbody id="divisionsTable"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- STUDENTS -->
+        <div id="students" class="section">
+            <div class="glass-card">
+                <div class="table-container" style="margin-top:1rem">
+                    <table>
+                        <thead><tr><th>ID</th><th>Name</th><th>Branch</th><th>Division</th><th>Sem</th><th>Actions</th></tr></thead>
+                        <tbody id="studentsTable"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- SCHEDULES -->
+        <div id="schedules" class="section">
+            <div class="glass-card">
+                <button class="btn btn-primary" onclick="openModal('scheduleModal')"><i class="fas fa-plus"></i> Add Recurring Schedule</button>
+                <h3 style="margin-top: 2rem;">Recurring Schedules</h3>
+                <div class="table-container" style="margin-top:1rem">
+                    <table>
+                        <thead><tr><th>Day</th><th>Branch/Div</th><th>Subject</th><th>Time</th><th>Actions</th></tr></thead>
+                        <tbody id="recurringSchedulesTable"></tbody>
+                    </table>
+                </div>
+                
+                <h3 style="margin-top: 2rem;">Daily Active Sessions</h3>
+                <div class="table-container" style="margin-top:1rem">
+                    <table>
+                        <thead><tr><th>Date</th><th>Branch/Div</th><th>Subject</th><th>Time</th><th>Status</th></tr></thead>
+                        <tbody id="sessionsTable"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- REPORTS -->
+        <div id="reports" class="section">
+            <div class="glass-card">
+                <div class="table-container">
+                    <table>
+                        <thead><tr><th>Date</th><th>Student</th><th>Branch/Div</th><th>Subject</th><th>Status</th></tr></thead>
+                        <tbody id="reportsTable"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- AUDIT LOGS -->
+        <div id="audit" class="section">
+            <div class="glass-card">
+                <div class="table-container">
+                    <table>
+                        <thead><tr><th>Time</th><th>Admin</th><th>Action</th><th>Entity</th><th>Description</th></tr></thead>
+                        <tbody id="auditTable"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Modals -->
+    <div id="branchModal" class="modal">
+        <div class="modal-content glass-card">
+            <div class="modal-header"><h3 style="font-family: Outfit">Add Branch</h3><button onclick="closeModal('branchModal')"><i class="fas fa-times"></i></button></div>
+            <form id="branchForm">
+                <div class="form-group"><label>Name</label><input type="text" id="branchName" class="form-control" required></div>
+                <button type="submit" class="btn btn-primary" style="margin-top:1rem; width:100%">Save</button>
+            </form>
+        </div>
+    </div>
+    
+    <div id="divisionModal" class="modal">
+        <div class="modal-content glass-card">
+            <div class="modal-header"><h3 style="font-family: Outfit">Add Division</h3><button onclick="closeModal('divisionModal')"><i class="fas fa-times"></i></button></div>
+            <form id="divisionForm">
+                <div class="form-group"><label>Branch</label><select id="divBranchSelect" class="form-control" required></select></div>
+                <div class="form-group"><label>Name</label><input type="text" id="divisionName" class="form-control" required></div>
+                <button type="submit" class="btn btn-primary" style="margin-top:1rem; width:100%">Save</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Recurring Schedule Modal -->
+    <div id="scheduleModal" class="modal">
+        <div class="modal-content glass-card">
+            <div class="modal-header"><h3 style="font-family: Outfit">Add Recurring Schedule</h3><button onclick="closeModal('scheduleModal')"><i class="fas fa-times"></i></button></div>
+            <form id="scheduleForm">
+                <div class="form-group"><label>Day of Week</label>
+                    <select id="schedDay" class="form-control" required>
+                        <option value="Monday">Monday</option><option value="Tuesday">Tuesday</option>
+                        <option value="Wednesday">Wednesday</option><option value="Thursday">Thursday</option>
+                        <option value="Friday">Friday</option><option value="Saturday">Saturday</option><option value="Sunday">Sunday</option>
+                    </select>
+                </div>
+                <div class="form-group"><label>Branch</label><select id="schedBranchSelect" class="form-control" required></select></div>
+                <div class="form-group"><label>Division</label><select id="schedDivSelect" class="form-control" required></select></div>
+                <div class="form-group"><label>Semester</label><input type="number" id="schedSem" class="form-control" required min="1" max="8"></div>
+                <div class="form-group"><label>Subject</label><input type="text" id="schedSub" class="form-control"></div>
+                <div class="form-grid" style="margin-top:0.5rem">
+                    <div class="form-group"><label>Start Time</label><input type="time" id="schedStart" class="form-control" required></div>
+                    <div class="form-group"><label>End Time</label><input type="time" id="schedEnd" class="form-control" required></div>
+                </div>
+                <button type="submit" class="btn btn-primary" style="margin-top:1rem; width:100%">Save</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Transfer Student Modal -->
+    <div id="transferModal" class="modal">
+        <div class="modal-content glass-card">
+            <div class="modal-header"><h3 style="font-family: Outfit">Transfer Student</h3><button onclick="closeModal('transferModal')"><i class="fas fa-times"></i></button></div>
+            <form id="transferForm">
+                <input type="hidden" id="transferStudentId">
+                <div class="form-group"><label>Branch</label><select id="transBranchSelect" class="form-control"></select></div>
+                <div class="form-group"><label>Division</label><select id="transDivSelect" class="form-control"></select></div>
+                <div class="form-group"><label>Semester</label><input type="number" id="transSem" class="form-control" min="1" max="8"></div>
+                <button type="submit" class="btn btn-primary" style="margin-top:1rem; width:100%">Transfer</button>
+                <button type="button" class="btn btn-secondary" style="margin-top:0.5rem; width:100%" onclick="removeStudentFromDivision()">Remove from Branch/Division</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="../js/api.js"></script>
+    <script src="js/admin.js"></script>
+</body>
+</html>

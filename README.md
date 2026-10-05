@@ -1,155 +1,140 @@
-# FaceTrack - Face Recognition Attendance System
+# FaceTrack - Complete College Attendance Management System
 
-FaceTrack is a modern, full-stack face recognition attendance system developed for the FSD Innovative Assignment. It provides an efficient and fast way to manage student attendance using computer vision.
+This is a comprehensive upgrade to the Face Recognition System for Attendance, transformed into a full college attendance management system.
 
-## Features
+## 1. What You Changed
 
-- **Student Registration**: Register students with their details and face encoding.
-- **Face Registration**: Capture student faces using a webcam directly from the browser.
-- **Automated Attendance**: Mark attendance simply by scanning a face through the webcam.
-- **Duplicate Prevention**: Prevents the same student from being marked present multiple times in a single day.
-- **Dashboard**: View real-time statistics (total students, present today, absent today, attendance percentage).
-- **Records & Reports**: View historical attendance data with filters (Date, Student ID, Division) and export to CSV.
-- **Modern UI**: A premium, responsive interface featuring glassmorphism and dynamic design.
+- **Branch Management**: Added CRUD operations for academic branches (e.g., Computer Science, IT).
+- **Division Management**: Added CRUD operations for divisions linked to branches.
+- **Admin Panel**: Created a dedicated, secure `/admin` area for administrative tasks.
+- **Admin Authentication**: Implemented JWT-based admin login with secure password hashing via `bcrypt`.
+- **Attendance Schedule**: Added the ability to create attendance sessions tied to Branch, Division, Semester, and time windows.
+- **Attendance Time Window**: Enforced that attendance can only be marked during active session windows using the server's timezone (Asia/Kolkata).
+- **Automatic Absent Marking**: Implemented a reliable background scheduler using `APScheduler` that automatically finds expired sessions and marks remaining students as "Absent".
+- **Audit Logs**: Created an automatic audit logging system to track all administrative actions.
+- **Safe Deletion**: Implemented database-level cascade/nullify constraints for safe deletion of records.
+- **Reports & Dashboard**: Upgraded the admin dashboard and added comprehensive reports.
+- **Backend Refactoring**: Restructured the Flask application to include JWT middleware and timezone-aware logic.
 
-## Technologies Used
+## 2. Files Changed
 
-- **Frontend**: HTML5, CSS3 (Vanilla), JavaScript (Vanilla)
-- **Backend**: Python 3, Flask, Flask-CORS
-- **Computer Vision**: OpenCV, dlib, face_recognition
-- **Database**: MySQL (via XAMPP)
+**Created:**
+- `backend/setup_admin.py` (Script to generate admin password hash)
+- `backend/migrate.py` (Python migration script)
+- `frontend/admin/index.html` (Admin dashboard & panel)
+- `frontend/admin/login.html` (Admin login page)
+- `frontend/admin/js/admin.js` (Admin panel logic)
 
-## Project Structure
+**Modified:**
+- `backend/app.py` (Completely rewritten to add JWT auth, branches, divisions, sessions, audit, and scheduler)
+- `backend/requirements.txt` (Added `bcrypt`, `PyJWT`, `APScheduler`, `pytz`)
+- `frontend/students.html` (Updated registration form to use branch_id and division_id)
+- `frontend/js/students.js` (Updated API payload and table rendering)
+- `frontend/attendance.html` (Minor adjustments)
+- `database/schema.sql` (Completely rewritten with new tables and relationships)
 
-```text
-face-attendance-system/
-│
-├── frontend/
-│   ├── index.html           # Dashboard
-│   ├── students.html        # Registration
-│   ├── attendance.html      # Take Attendance
-│   ├── records.html         # View Records
-│   ├── css/
-│   │   └── style.css        # Premium Glassmorphism UI
-│   └── js/
-│       ├── api.js           # API Helper
-│       ├── main.js          # Dashboard Logic
-│       ├── students.js      # Registration Logic
-│       ├── attendance.js    # Camera/Scanning Logic
-│       └── records.js       # Filtering & Export Logic
-│
-├── backend/
-│   ├── app.py               # Main Flask API
-│   ├── database.py          # MySQL Connection Handling
-│   └── requirements.txt     # Python Dependencies
-│
-├── database/
-│   └── schema.sql           # MySQL Database Schema
-│
-├── .env                     # Environment Variables
-├── .env.example
-└── README.md
-```
+## 3. Database Changes
 
-## Requirements
+**New Tables:**
+- `admin_users`: Stores admin credentials securely.
+- `branches`: Stores academic branches.
+- `divisions`: Stores divisions linked to branches.
+- `attendance_sessions`: Stores scheduled attendance sessions with start and end times.
+- `audit_logs`: Tracks administrative actions.
 
-- **XAMPP** (For MySQL server)
-- **Python 3.8+** (Required for the backend)
-- **C++ Build Tools** (Required on Windows to compile `dlib` if not using pre-built wheels)
-- **Modern Web Browser** (Chrome/Edge/Firefox) with Webcam access
+**Modified Tables:**
+- `students`: Added `branch_id` and `division_id` as foreign keys.
+- `attendance`: Replaced generic date tracking with `session_id` linking to `attendance_sessions`. Added unique constraint on `(student_id, session_id)`.
 
-## Setup Instructions
+**Relationships:**
+- Branch 1:N Division
+- Branch & Division 1:N Students
+- Branch & Division 1:N Attendance Sessions
+- Session 1:N Attendance Records
+- Student 1:N Attendance Records
 
-### 1. XAMPP & MySQL Database Setup
+## 4. How to Run
 
-1. Install and open **XAMPP Control Panel**.
-2. Start the **MySQL** module.
-3. Open `http://localhost/phpmyadmin` in your browser.
-4. Go to the **Import** tab.
-5. Choose the file `database/schema.sql` from this repository and click **Import**.
-   - *Alternatively, create a database named `facetrack_attendance` and paste the contents of `schema.sql` into the SQL tab.*
-
-### 2. Python Backend Setup
-
-1. Open a terminal in the project root directory.
-2. (Optional but recommended) Create a virtual environment:
-   ```bash
-   python -m venv venv
-   # Activate it (Windows)
-   venv\Scripts\activate
-   ```
-3. Install dependencies:
+1. Open a terminal in the project root.
+2. Install Python dependencies:
    ```bash
    pip install -r backend/requirements.txt
    ```
-   > **Note on `face_recognition`**: Installing this on Windows might require Visual Studio C++ Build tools because it compiles `dlib`. If you encounter errors, install CMake (`pip install cmake`) and ensure C++ tools are installed.
-4. Ensure the `.env` file exists in the root directory and matches your XAMPP MySQL configuration:
-   ```env
-   DB_HOST=localhost
-   DB_USER=root
-   DB_PASSWORD=
-   DB_NAME=facetrack_attendance
-   PORT=5000
-   ```
-5. Run the Flask server:
+3. Set up the `.env` file (see Configuration section).
+4. Start the backend server:
    ```bash
    python backend/app.py
    ```
-   The backend should now be running on `http://localhost:5000`.
-
-### 3. Frontend Setup
-
-1. You can serve the frontend files using any simple HTTP server, or simply open the HTML files directly.
-2. To run a simple server:
+5. Serve the frontend (you can use XAMPP, or a simple HTTP server):
    ```bash
-   # From the project root
    python -m http.server 8000
    ```
-3. Open `http://localhost:8000/frontend/index.html` in your browser.
-   *(Or just double-click `frontend/index.html` to open it in your browser).*
+6. Open your browser to `http://localhost:8000/frontend/index.html` (or `http://localhost/frontend` if using XAMPP).
 
-## How to Use the System
+## 5. XAMPP Setup
 
-### How to Register a Student and Face Data
-1. Navigate to the **Students** page.
-2. Fill in the student details (ID, Name, Enrollment Number, Division, Semester, Email).
-3. Under Face Registration, click **Start Camera**. (Allow camera permissions if prompted).
-4. Look at the camera and click **Capture Face**.
-5. Click **Register Student**. The face encoding and details will be saved to MySQL.
+1. Open XAMPP Control Panel.
+2. Start the **Apache** and **MySQL** modules.
+3. Open `http://localhost/phpmyadmin` in your browser.
+4. Create a database named `facetrack_attendance`.
+5. Go to the **Import** tab.
+6. Choose the file `database/schema.sql` from this repository and click **Import**.
+7. Ensure your `.env` file matches your XAMPP configuration (default is usually user `root` with no password).
 
-### How to Take Attendance
-1. Navigate to the **Take Attendance** page.
-2. Click **Start Camera**.
-3. Have the registered student look at the camera.
-4. Click **Scan Face**.
-5. The system will identify the student and mark them present. If they are already marked present for the day, it will display an "Already Marked" warning.
+## 6. Admin Setup
 
-### How to View Reports
-1. Navigate to the **Records & Reports** page.
-2. View all attendance records.
-3. Use the filters (Date, Student ID/Name, Division) to narrow down results.
-4. Click **Export CSV** to download the filtered data.
+1. Set up your `.env` file based on `.env.example`.
+2. The initial admin is defined in the `.env` file as `ADMIN_USERNAME` and `ADMIN_PASSWORD`.
+3. Open a terminal and run the setup script to get the password hash:
+   ```bash
+   python backend/setup_admin.py
+   ```
+4. Copy the generated `INSERT INTO` SQL command and run it in phpMyAdmin to create the admin user.
+5. Open the Admin Panel in your browser: `http://localhost:8000/frontend/admin/login.html` (or your appropriate URL).
+6. Log in with the configured username and password.
 
-## Testing Results
+## 7. Complete Application Walkthrough
 
-The system has been comprehensively tested for:
-- **Database**: Successful connection, correct schema creation, and CRUD operations.
-- **Face Recognition**: 
-  - Detects faces correctly using `face_recognition` library.
-  - Recognizes known students with high accuracy.
-  - Rejects unknown faces.
-- **Duplicate Prevention**: Handles duplicate scans smoothly by notifying the user instead of duplicating database records.
-- **Frontend-Backend Integration**: API endpoints successfully receive base64 image strings, decode them, process them, and return appropriate JSON responses.
+1. **Admin Login**: Navigate to `/frontend/admin/login.html` and log in.
+2. **Branch Management**: Go to the **Branches** tab and create a new branch (e.g., Computer Science).
+3. **Division Management**: Go to the **Divisions** tab and create a division linked to the branch.
+4. **Student Registration**: Go to the standard **Students** page (`/frontend/students.html`). Register a student, selecting the appropriate Branch ID and Division ID (as seen in the admin panel), and capture their face.
+5. **Schedule Attendance**: Back in the Admin Panel, go to the **Schedules** tab. Create a new session for the branch/division. Set the date, start time, and end time.
+6. **Take Attendance**: Navigate to the standard **Take Attendance** page (`/frontend/attendance.html`) during the scheduled time window. Scan the student's face. The system will mark them as Present.
+7. **Automatic Absent**: Wait for the scheduled end time to pass. The backend scheduler (running every minute) will automatically find the expired session, mark all remaining students in that branch/division as Absent, and finalize the session.
+8. **Reports & Audit**: In the Admin Panel, check the **Reports** tab to see the attendance records. Check the **Audit Logs** tab to see a history of all actions taken (e.g., session creation, student registration).
 
-## Known Limitations
+## 8. Testing Results
 
-- **Lighting**: Face recognition accuracy may drop in extremely low light or harsh backlighting.
-- **Multiple Faces**: The current setup rejects the scan if multiple faces are in the frame to prevent ambiguity during attendance marking.
-- **Scalability**: Processing large numbers of faces sequentially in Python (without vectorization optimizations or parallel processing) might slow down identification as the database grows significantly.
+| Feature | Result |
+| :--- | :--- |
+| MySQL connection | NOT VERIFIED |
+| Admin login | NOT VERIFIED |
+| Student registration | NOT VERIFIED |
+| Face registration | NOT VERIFIED |
+| Face recognition | NOT VERIFIED |
+| Branch management | NOT VERIFIED |
+| Division management | NOT VERIFIED |
+| Scheduling | NOT VERIFIED |
+| Attendance | NOT VERIFIED |
+| Duplicate prevention | NOT VERIFIED |
+| Automatic absent | NOT VERIFIED |
+| Reports | NOT VERIFIED |
+| Audit logs | NOT VERIFIED |
+| Security checks | NOT VERIFIED |
 
-## Suggestions for Future Improvements
+*(Testing could not be fully verified as MySQL was not accessible on the host machine during development. Please run the application locally following the instructions to verify.)*
 
-- Implement real-time continuous scanning (webcam feed processed live via WebSockets) instead of manual capture-and-scan.
-- Add an Admin Authentication layer to secure the dashboard and registration endpoints.
-- Support multiple face detections simultaneously to mark attendance for a group of students at once.
-- Migrate to a more scalable model endpoint (e.g., deploying the face recognition model as a microservice on a GPU instance).
+## 9. Known Issues
+
+- Student Registration Form: Currently requires manually typing the `Branch ID` and `Division ID` integer values. In a production environment, this should be a dropdown populated dynamically from the API.
+- Missing Students: If a student is deleted, their historical attendance records are cascaded/deleted. Soft deletion would be safer.
+- Frontend Paths: Hardcoded API URL (`http://localhost:5000/api`) assumes default local setup.
+
+## 10. Future Improvements
+
+- Add a dynamic dropdown for Branches and Divisions on the student registration page.
+- Implement Soft Delete (e.g., `is_active` flag) for students to preserve historical attendance.
+- Add password reset capabilities for Admin users.
+- Support multiple overlapping sessions for the same branch/division if they are different subjects.
+- Enhance the frontend Admin Panel with more robust validation and error handling for form submissions.
